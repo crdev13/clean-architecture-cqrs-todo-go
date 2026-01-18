@@ -9,3 +9,9 @@ type Todo struct {
 	Done      bool
 	CreatedAt time.Time
 }
+
+func (t Todo) MarkDone() Todo {
+	t.Done = true
+
+	return t
+}
