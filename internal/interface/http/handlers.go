@@ -31,6 +31,32 @@ func (h Handlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, map[string]string{"id": res.(string)})
 }
 
+func (h Handlers) CreateTodo(w http.ResponseWriter, r *http.Request) {
+	// POST /users/{id}/todos
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) != 3 || parts[0] != "users" || parts[2] != "todos" {
+		writeJSON(w, 404, map[string]string{"error": "not found"})
+		return
+	}
+	userID := parts[1]
+
+	var body struct {
+		Title string `json:"title"`
+	}
+	if err := readJSON(r, &body); err != nil {
+		writeJSON(w, 400, map[string]string{"error": "invalid json"})
+		return
+	}
+
+	cmd := commands.CreateTodo{UserID: userID, Title: body.Title}
+	res, err := h.Cmd.CreateTodo(context.Background(), cmd)
+	if err != nil {
+		writeDomainErr(w, err)
+		return
+	}
+	writeJSON(w, 201, map[string]any{"id": res.(string)})
+}
+
 func (h Handlers) ListUserTodos(w http.ResponseWriter, r *http.Request) {
 	// GET /users/{id}/todos
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
